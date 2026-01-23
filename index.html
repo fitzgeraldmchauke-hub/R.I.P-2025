@@ -3,32 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Persistent Page</title>
+<title>Live-Save Page</title>
 <style>
   body { font-family: Arial; padding: 20px; }
-  #content { width: 100%; height: 200px; }
+  #content { width: 100%; height: 300px; padding: 10px; font-size: 16px; }
 </style>
 </head>
 <body>
 
-<h2>Edit this content</h2>
-<textarea id="content" placeholder="Type something..."></textarea>
-<button onclick="saveContent()">Save</button>
+<h2>Live-Save Editor</h2>
+<p>Type below. Changes are saved automatically and will appear when you reload the page.</p>
+<textarea id="content" placeholder="Start typing..."></textarea>
 
 <script>
   const textarea = document.getElementById('content');
 
-  // Load saved content when page loads
+  // Load saved content on page load
   window.onload = () => {
     const saved = localStorage.getItem('pageContent');
-    if(saved) textarea.value = saved;
+    if (saved) textarea.value = saved;
   };
 
-  // Save content to localStorage
-  function saveContent() {
+  // Save content as user types (live)
+  textarea.addEventListener('input', () => {
     localStorage.setItem('pageContent', textarea.value);
-    alert('Content saved!');
-  }
+  });
 </script>
 
 </body>
