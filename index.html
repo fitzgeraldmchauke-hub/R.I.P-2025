@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persistent Page</title>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  #content { width: 100%; height: 200px; }
+</style>
 </head>
 <body>
-    <h1>hi smelly</h1>
-    <div>
-    <form><button>click me</button><a href="https://fitzgeraldmchauke-hub.github.io/mini-website-builder/ "link to the best place ever</a></form>
-        <img>https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCmgkix4DEJoToCFKP-g8ztCYa9bIuxAC3pA&s
-    </div>
+
+<h2>Edit this content</h2>
+<textarea id="content" placeholder="Type something..."></textarea>
+<button onclick="saveContent()">Save</button>
+
+<script>
+  const textarea = document.getElementById('content');
+
+  // Load saved content when page loads
+  window.onload = () => {
+    const saved = localStorage.getItem('pageContent');
+    if(saved) textarea.value = saved;
+  };
+
+  // Save content to localStorage
+  function saveContent() {
+    localStorage.setItem('pageContent', textarea.value);
+    alert('Content saved!');
+  }
+</script>
+
 </body>
 </html>
