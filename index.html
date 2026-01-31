@@ -8,13 +8,17 @@
   body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
   button { margin: 10px; padding: 10px 20px; font-size: 16px; }
   audio { display: block; margin-top: 20px; }
+  .error { color: red; margin-top: 20px; }
 </style>
 </head>
 <body>
 <h1>Simple Voice Recorder</h1>
+<p>⚠️ Note: This page must be served over HTTPS for microphone access to work.</p>
 <button id="startBtn">Start Recording</button>
 <button id="stopBtn" disabled>Stop Recording</button>
+<button id="downloadBtn" disabled>Download Recording</button>
 <audio id="audioPlayback" controls></audio>
+<div id="errorMsg" class="error"></div>
 
 <script>
 let mediaRecorder;
@@ -22,29 +26,71 @@ let audioChunks = [];
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
+const downloadBtn = document.getElementById('downloadBtn');
 const audioPlayback = document.getElementById('audioPlayback');
+const errorMsg = document.getElementById('errorMsg');
+
+async function checkSecureContext() {
+  if (window.isSecureContext === false) {
+    errorMsg.textContent = 'Error: Microphone access requires HTTPS or localhost.';
+    startBtn.disabled = true;
+    return false;
+  }
+  return true;
+}
 
 startBtn.addEventListener('click', async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
+  errorMsg.textContent = '';
+  if (!await checkSecureContext()) return;
 
-  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-  mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+    if (!MediaRecorder) {
+      errorMsg.textContent = 'Error: MediaRecorder not supported in this browser.';
+      return;
+    }
+
     audioChunks = [];
-    const audioUrl = URL.createObjectURL(audioBlob);
-    audioPlayback.src = audioUrl;
-  };
+    mediaRecorder = new MediaRecorder(stream);
 
-  mediaRecorder.start();
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
+    mediaRecorder.ondataavailable = e => {
+      if (e.data && e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm; codecs=opus' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioPlayback.src = audioUrl;
+      downloadBtn.href = audioUrl;
+      downloadBtn.download = 'recording.webm';
+      downloadBtn.disabled = false;
+    };
+
+    mediaRecorder.start();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    downloadBtn.disabled = true;
+  } catch (err) {
+    console.error(err);
+    if (err.name === 'NotAllowedError') {
+      errorMsg.textContent = 'Error: Microphone access denied. Please allow permission.';
+    } else if (err.name === 'NotFoundError') {
+      errorMsg.textContent = 'Error: No microphone found.';
+    } else {
+      errorMsg.textContent = 'Error accessing microphone: ' + err.message;
+    }
+  }
 });
 
 stopBtn.addEventListener('click', () => {
-  mediaRecorder.stop();
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
   startBtn.disabled = false;
   stopBtn.disabled = true;
 });
-</scri
+
+</script>
+</body>
+</html>
