@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <button onclick="location.href='index.html'">⬅ Back to Games</button>
+  <div id="game-container"></div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const file = params.get("game");
+
+    if (file) {
+      document.getElementById("game-container").innerHTML = `
+        <iframe src="${file}" width="800" height="600"></iframe>
+      `;
+    } else {
+      document.getElementById("game-container").textContent = "No game selected.";
+    }
+  </script>
+</body>
+</html>
+
+</body>
+</html>
